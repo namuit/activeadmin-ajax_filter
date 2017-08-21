@@ -30,7 +30,11 @@ $ ->
             callback(res)
 
       relatedInput = (field) ->
-        $("[name*=#{field}]", select.parents('form'))
+        tmpRelatedInput = $("[name*=#{field}]", select.parents('form'))
+        if tmpRelatedInput.length > 0
+          return tmpRelatedInput
+        else
+          return $("[name*=#{field.replace('_id', '')}]", select.parents('form'))
 
       isCircularAjaxSearchLink = (initial_input_id, field) ->
         input = relatedInput(field)
@@ -47,6 +51,7 @@ $ ->
           { field: c[0], direction: c[1] }
         options: []
         create: false
+        preload: 'focus'
         render:
           option: (item, escape) ->
             html = searchFields.map (field, index)->
@@ -62,21 +67,24 @@ $ ->
             "<div class='item'>#{html.join('')}</div>"
 
         load: (query, callback) ->
+          q = {}
           if query.length
-            q = {}
             q[select.data('ransack')] = query
 
-            ajaxFields.forEach (field) ->
-              q["#{field}_eq"] = relatedInput(field).val()
-              # clear cache because it wrong with changing values of ajaxFields
-              select.loadedSearches = {}
+            for ransack, value of staticRansack
+              q[ransack] = value
+          else
+            q[select.data('ransack')] = null
 
             for ransack, value of staticRansack
               q[ransack] = value
 
-            loadOptions(q, callback)
-          else
-            callback()
+          ajaxFields.forEach (field) ->
+            q["#{field}_eq"] = relatedInput(field).val()
+            # clear cache because it wrong with changing values of ajaxFields
+            select.loadedSearches = {}
+
+          loadOptions(q, callback)
 
         onInitialize: ->
           selectize = this
@@ -88,6 +96,7 @@ $ ->
             q[selectedRansack] = selectedValue
 
             loadOptions(q, (res)->
+              console.log(res);
               if res && res.length
                 selectize.addOption(res[0])
                 selectize.addItem(res[0][valueField])
