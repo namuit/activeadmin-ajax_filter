@@ -30,11 +30,11 @@ $ ->
             callback(res)
 
       relatedInput = (field) ->
-        tmpRelatedInput = $("[name*=#{field}]", select.parents('form'))
+        tmpRelatedInput = $("[name*=#{field}]", select.closest('fieldset'))
         if tmpRelatedInput.length > 0
           return tmpRelatedInput
         else
-          return $("[name*=#{field.replace('_id', '')}]", select.parents('form'))
+          return $("[name*=#{field.replace('_id', '')}]", select.closest('fieldset'))
 
       isCircularAjaxSearchLink = (initial_input_id, field) ->
         input = relatedInput(field)
@@ -63,7 +63,6 @@ $ ->
                 klass = 'secondary'
 
               "<span class='#{klass}'>#{value}</span>"
-
             "<div class='item'>#{html.join('')}</div>"
 
         load: (query, callback) ->
@@ -83,20 +82,20 @@ $ ->
             q["#{field}_eq"] = relatedInput(field).val()
             # clear cache because it wrong with changing values of ajaxFields
             select.loadedSearches = {}
-
           loadOptions(q, callback)
 
         onInitialize: ->
           selectize = this
           selectedValue = select.data('selected-value')
           selectedRansack = "#{valueField}_eq"
+          # sometimes the sifter options contains other values
+          this.options = this.sifter.items = {}
 
           if selectedValue
             q = {}
             q[selectedRansack] = selectedValue
 
             loadOptions(q, (res)->
-              console.log(res);
               if res && res.length
                 selectize.addOption(res[0])
                 selectize.addItem(res[0][valueField])
