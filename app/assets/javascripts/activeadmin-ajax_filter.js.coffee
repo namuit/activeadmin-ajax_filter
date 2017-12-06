@@ -30,11 +30,17 @@ $ ->
             callback(res)
 
       relatedInput = (field) ->
-        tmpRelatedInput = $("[name*=#{field}]", select.closest('fieldset'))
-        if tmpRelatedInput.length > 0
-          return tmpRelatedInput
-        else
-          return $("[name*=#{field.replace('_id', '')}]", select.closest('fieldset'))
+
+        possibileInputs =
+          "[name*=#{field}]": select.closest('fieldset'),
+          "[name*=#{field.replace('_id', '')}]": select.closest('fieldset'),
+          "[id=#{field}]": select.parents('form'),
+
+        for k, v of possibileInputs
+          tmpRelatedInput = $(k, v)
+          if tmpRelatedInput.length > 0
+            break
+        return tmpRelatedInput
 
       isCircularAjaxSearchLink = (initial_input_id, field) ->
         input = relatedInput(field)
