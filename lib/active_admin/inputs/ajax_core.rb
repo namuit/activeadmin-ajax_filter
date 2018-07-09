@@ -18,6 +18,7 @@ module ActiveAdmin
           'data-static-ransack' => static_ransack,
           'data-selected-value' => selected_value,
           'data-url' => url,
+          'data-reload-when-search-fields-change' => reload_when_search_fields_change
         )
       end
 
@@ -55,6 +56,10 @@ module ActiveAdmin
 
       def static_ransack
         ajax_data.fetch(:static_ransack, {}).to_json
+      end
+
+      def reload_when_search_fields_change
+        ajax_data[:reload_when_search_fields_change] || false
       end
 
       def url

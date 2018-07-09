@@ -97,20 +97,31 @@ $ ->
           # sometimes the sifter options contains other values
           this.options = this.sifter.items = {}
 
-          if selectedValue
-            q = {}
-            q[selectedRansack] = selectedValue
+          prepopulateSelectedValue = ->
+            if selectedValue
+              q = {}
+              q[selectedRansack] = selectedValue
 
-            loadOptions(q, (res)->
-              if res && res.length
-                selectize.addOption(res[0])
-                selectize.addItem(res[0][valueField])
-            )
+              for ransack, value of staticRansack
+                q[ransack] = value
+
+              ajaxFields.forEach (field) ->
+                q["#{field}_eq"] = relatedInput(field).val()
+                select.loadedSearches = {}
+
+              loadOptions q, (res) ->
+                if res && res.length
+                  selectize.addOption(res[0])
+                  selectize.addItem(res[0][valueField])
+
+          prepopulateSelectedValue()
 
           ajaxFields.forEach (field) ->
             if !isCircularAjaxSearchLink(selectize.$input.attr('id'), field)
               relatedInput(field).change ->
                 selectize.clearOptions()
+                prepopulateSelectedValue() if select.data('reload-when-search-fields-change')
+
 
   # apply ajax filter to all static inputs
   apply_filter_ajax_select()
