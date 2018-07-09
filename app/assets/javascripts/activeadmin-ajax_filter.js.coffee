@@ -73,16 +73,9 @@ $ ->
 
         load: (query, callback) ->
           q = {}
-          if query.length
-            q[select.data('ransack')] = query
-
-            for ransack, value of staticRansack
-              q[ransack] = value
-          else
-            q[select.data('ransack')] = null
-
-            for ransack, value of staticRansack
-              q[ransack] = value
+          q[select.data('ransack')] = if query.length then query else null
+          for ransack, value of staticRansack
+            q[ransack] = value
 
           ajaxFields.forEach (field) ->
             q["#{field}_eq"] = relatedInput(field).val()
